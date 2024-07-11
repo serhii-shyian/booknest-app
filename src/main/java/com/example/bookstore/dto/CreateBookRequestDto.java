@@ -1,7 +1,6 @@
 package com.example.bookstore.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
@@ -10,11 +9,11 @@ import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.URL;
 
 public record CreateBookRequestDto(
-        @NotEmpty(message = "Title may not be empty")
+        @NotBlank(message = "Title may not be blank")
         String title,
-        @NotEmpty(message = "Author may not be empty")
+        @NotBlank(message = "Author may not be blank")
         String author,
-        @NotEmpty(message = "Isbn may not be empty")
+        @NotBlank(message = "Isbn may not be blank")
         @ISBN
         String isbn,
         @NotNull(message = "Price may not be null")
