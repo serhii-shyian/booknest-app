@@ -13,6 +13,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
+import org.springframework.beans.factory.annotation.Value;
 
 @Entity
 @Table(name = "books")
@@ -37,5 +38,6 @@ public class Book {
     private String description;
     private String coverImage;
     @Column(nullable = false)
-    private boolean isDeleted = false;
+    @Value("false")
+    private boolean isDeleted;
 }
