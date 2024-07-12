@@ -9,7 +9,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,7 +35,12 @@ public class BookController {
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Get all books",
             description = "Get a list of all available books")
-    public List<BookDto> getAll(Pageable pageable) {
+    public List<BookDto> getAll(@ParameterObject
+                                @PageableDefault(
+                                        size = 5,
+                                        sort = "title",
+                                        direction = Sort.Direction.ASC)
+                                Pageable pageable) {
         return bookService.findAll(pageable);
     }
 
@@ -48,8 +56,14 @@ public class BookController {
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Get all books by parameters",
             description = "Get a list of all books according to the parameters")
-    public List<BookDto> searchBooks(BookSearchParametersDto searchParameters) {
-        return bookService.searchByParameters(searchParameters);
+    public List<BookDto> searchBooks(BookSearchParametersDto searchParameters,
+                                     @ParameterObject
+                                     @PageableDefault(
+                                             size = 5,
+                                             sort = "title",
+                                             direction = Sort.Direction.ASC)
+                                     Pageable pageable) {
+        return bookService.searchByParameters(searchParameters, pageable);
     }
 
     @PostMapping

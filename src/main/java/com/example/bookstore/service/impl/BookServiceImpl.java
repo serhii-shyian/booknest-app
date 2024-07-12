@@ -55,7 +55,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public List<BookDto> searchByParameters(BookSearchParametersDto params) {
+    public List<BookDto> searchByParameters(BookSearchParametersDto params, Pageable pageable) {
         Specification<Book> bookSpecification = bookSpecificationBuilder.build(params);
         return bookMapper.toDtoList(bookRepository.findAll(bookSpecification));
     }
