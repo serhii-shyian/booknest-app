@@ -1,10 +1,10 @@
 databaseChangeLog:
     - changeSet:
-        id: create-users-table
+        id: create-roles-table
         author: john_smith
         changes:
           - createTable:
-              tableName: users
+              tableName: roles
               columns:
                 - column:
                     name: id
@@ -14,29 +14,11 @@ databaseChangeLog:
                       primaryKey: true
                       nullable: false
                 - column:
-                    name: email
+                    name: name
                     type: varchar(255)
                     constraints:
                       nullable: false
                       unique: true
-                - column:
-                    name: password
-                    type: varchar(255)
-                    constraints:
-                      nullable: false
-                - column:
-                    name: first_name
-                    type: varchar(255)
-                    constraints:
-                      nullable: false
-                - column:
-                    name: last_name
-                    type: varchar(255)
-                    constraints:
-                      nullable: false
-                - column:
-                    name: shipping_address
-                    type: varchar(255)
                 - column:
                     name: is_deleted
                     type: TINYINT(1)
