@@ -45,7 +45,7 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
     protected ResponseEntity<Object> handleRegistrationException(
             RegistrationException ex
     ) {
-        return getObjectResponseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        return getObjectResponseEntity(ex.getMessage(), HttpStatus.CONFLICT);
     }
 
     private ResponseEntity<Object> getObjectResponseEntity(
