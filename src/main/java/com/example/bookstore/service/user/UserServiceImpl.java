@@ -23,22 +23,21 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public UserResponseDto register(UserRegistrationRequestDto requestDto)
+    public UserResponseDto register(UserRegistrationRequestDto registrationDto)
             throws RegistrationException {
-        if (userRepository.existsByEmail(requestDto.email())) {
-            throw new RegistrationException(String.format(
-                    "User with email %s already exists",
-                    requestDto.email()));
+        if (userRepository.existsByEmail(registrationDto.email())) {
+            throw new RegistrationException(
+                    String.format("User with email %s already exists",
+                    registrationDto.email()));
         }
 
-        User user = userMapper.toModel(requestDto);
-        user.setPassword(passwordEncoder.encode(requestDto.password()));
-        user.setRoles(Set.of(
+        User userFromDto = userMapper.toEntity(registrationDto);
+        userFromDto.setPassword(passwordEncoder.encode(registrationDto.password()));
+        userFromDto.setRoles(Set.of(
                 findRoleByName(Role.RoleName.USER),
                 findRoleByName(Role.RoleName.MANAGER)));
-        User savedUser = userRepository.save(user);
 
-        return userMapper.toDto(savedUser);
+        return userMapper.toDto(userRepository.save(userFromDto));
     }
 
     private Role findRoleByName(Role.RoleName roleName) {
