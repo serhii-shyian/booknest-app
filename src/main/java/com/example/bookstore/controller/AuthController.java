@@ -30,16 +30,17 @@ public class AuthController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     @Operation(summary = "Authenticate user",
             description = "Authentication user according to the parameters")
-    public UserLoginResponseDto login(@RequestBody UserLoginRequestDto requestDto) {
-        return authService.authenticate(requestDto);
+    public UserLoginResponseDto login(@RequestBody UserLoginRequestDto loginDto) {
+        return authService.authenticate(loginDto);
     }
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Register user",
             description = "Registering a new user according to the parameters")
-    public UserResponseDto register(@RequestBody @Valid UserRegistrationRequestDto request)
+    public UserResponseDto register(
+            @RequestBody @Valid UserRegistrationRequestDto registrationDto)
             throws RegistrationException {
-        return userService.register(request);
+        return userService.register(registrationDto);
     }
 }

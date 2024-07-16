@@ -54,7 +54,7 @@ public class BookController {
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Get a book by id",
-            description = "Getting a book by id if it's available")
+            description = "Getting a book by id if available")
     @PreAuthorize("hasRole('ROLE_USER')")
     public BookDto getBookById(@PathVariable @Positive Long id) {
         return bookService.findById(id);
@@ -80,8 +80,8 @@ public class BookController {
     @Operation(summary = "Create a new book",
             description = "Creating a new book according to the parameters")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public BookDto createBook(@RequestBody @Valid CreateBookRequestDto bookRequestDto) {
-        return bookService.save(bookRequestDto);
+    public BookDto createBook(@RequestBody @Valid CreateBookRequestDto bookDto) {
+        return bookService.save(bookDto);
     }
 
     @PutMapping("/{id}")
@@ -90,14 +90,14 @@ public class BookController {
             description = "Updating a book by id according to the parameters")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public BookDto updateBookById(@PathVariable @Positive Long id,
-                                  @RequestBody @Valid CreateBookRequestDto bookRequestDto) {
-        return bookService.updateById(id,bookRequestDto);
+                                  @RequestBody @Valid CreateBookRequestDto bookDto) {
+        return bookService.updateById(id,bookDto);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete a book by id",
-            description = "Deleting a book by id if it's available")
+            description = "Deleting a book by id if available")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void deleteBookById(@PathVariable @Positive Long id) {
         bookService.deleteById(id);

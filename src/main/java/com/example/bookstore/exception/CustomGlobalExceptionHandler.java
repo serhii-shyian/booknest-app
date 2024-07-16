@@ -1,6 +1,7 @@
 package com.example.bookstore.exception;
 
 import jakarta.validation.ConstraintViolationException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -53,6 +54,13 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
     @ExceptionHandler(ConstraintViolationException.class)
     protected ResponseEntity<Object> handleConstraintViolationException(
             ConstraintViolationException ex
+    ) {
+        return getObjectResponseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
+    protected ResponseEntity<Object> handleSqlIntegrityConstraintViolationException(
+            SQLIntegrityConstraintViolationException ex
     ) {
         return getObjectResponseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }

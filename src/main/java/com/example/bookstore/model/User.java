@@ -24,8 +24,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
 @Table(name = "users")
-@SQLDelete(sql = "UPDATE books SET is_deleted = true WHERE id = ?")
-@SQLRestriction(value = "is_deleted=false")
+@SQLDelete(sql = "UPDATE users SET is_deleted = TRUE WHERE id = ?")
+@SQLRestriction(value = "is_deleted = FALSE")
 @Getter
 @Setter
 @ToString
@@ -47,7 +47,6 @@ public class User implements UserDetails {
             name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
-    @ToString.Exclude
     private Set<Role> roles = new HashSet<>();
     @Column(nullable = false)
     @Value("false")
