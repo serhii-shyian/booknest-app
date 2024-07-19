@@ -16,7 +16,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,7 +32,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/books")
 @Tag(name = "Book management", description = "Endpoint for managing books")
 @Validated
-@EnableMethodSecurity
 public class BookController {
     private final BookService bookService;
 

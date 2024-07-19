@@ -10,15 +10,15 @@ import org.springframework.data.domain.Pageable;
 public interface BookService {
     BookDto save(CreateBookRequestDto bookDto);
 
-    BookDto findById(Long id);
+    BookDto findById(Long bookId);
 
     List<BookDto> findAll(Pageable pageable);
 
     List<BookDtoWithoutCategoryIds> findAllByCategoryId(Long categoryId, Pageable pageable);
 
-    BookDto updateById(Long id, CreateBookRequestDto bookDto);
+    BookDto updateById(Long bookId, CreateBookRequestDto bookDto);
 
-    void deleteById(Long id);
+    void deleteById(Long bookId);
 
     List<BookDto> searchByParameters(BookSearchParametersDto paramsDto, Pageable pageable);
 }
