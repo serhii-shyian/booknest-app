@@ -9,29 +9,38 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+import org.springframework.beans.factory.annotation.Value;
 
 @Entity
-@Table(name = "cart_items")
+@Table(name = "order_items")
+@SQLDelete(sql = "UPDATE order_items SET is_deleted = TRUE WHERE id = ?")
+@SQLRestriction(value = "is_deleted = FALSE")
 @Getter
 @Setter
 @ToString
-public class CartItem {
+public class OrderItem {
     @Id
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "shopping_cart_id", nullable = false)
+    @JoinColumn(name = "order_id", nullable = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private ShoppingCart shoppingCart;
+    private Order order;
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     private Book book;
     @Column(nullable = false)
     private Integer quantity;
+    @Column(nullable = false)
+    private BigDecimal price;
+    @Column(nullable = false)
+    @Value("false")
+    private boolean isDeleted;
 }

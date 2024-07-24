@@ -6,5 +6,5 @@ import jakarta.validation.constraints.Positive;
 public record UpdateCartItemRequestDto(
         @NotNull(message = "Book quantity may not be null")
         @Positive
-        int quantity) {
+        Integer quantity) {
 }

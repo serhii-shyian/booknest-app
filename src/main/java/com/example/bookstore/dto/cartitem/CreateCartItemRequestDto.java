@@ -9,5 +9,5 @@ public record CreateCartItemRequestDto(
         Long bookId,
         @NotNull(message = "Book quantity may not be null")
         @Positive
-        int quantity) {
+        Integer quantity) {
 }

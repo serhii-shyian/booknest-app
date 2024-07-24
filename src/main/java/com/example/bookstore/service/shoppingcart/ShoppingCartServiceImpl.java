@@ -1,37 +1,38 @@
 package com.example.bookstore.service.shoppingcart;
 
-import com.example.bookstore.dto.book.BookDto;
 import com.example.bookstore.dto.cartitem.CartItemDto;
 import com.example.bookstore.dto.cartitem.CreateCartItemRequestDto;
 import com.example.bookstore.dto.cartitem.UpdateCartItemRequestDto;
 import com.example.bookstore.dto.shoppingcart.ShoppingCartDto;
 import com.example.bookstore.exception.EntityNotFoundException;
-import com.example.bookstore.mapper.BookMapper;
 import com.example.bookstore.mapper.CartItemMapper;
 import com.example.bookstore.mapper.ShoppingCartMapper;
+import com.example.bookstore.model.Book;
 import com.example.bookstore.model.CartItem;
 import com.example.bookstore.model.ShoppingCart;
 import com.example.bookstore.model.User;
+import com.example.bookstore.repository.book.BookRepository;
+import com.example.bookstore.repository.cartitem.CartItemRepository;
 import com.example.bookstore.repository.shoppingcart.ShoppingCartRepository;
-import com.example.bookstore.service.book.BookService;
-import com.example.bookstore.service.cartitem.CartItemService;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ShoppingCartServiceImpl implements ShoppingCartService {
     private final ShoppingCartRepository shoppingCartRepository;
     private final ShoppingCartMapper shoppingCartMapper;
-    private final CartItemService cartItemService;
+    private final CartItemRepository cartItemRepository;
     private final CartItemMapper cartItemMapper;
-    private final BookService bookService;
-    private final BookMapper bookMapper;
+    private final BookRepository bookRepository;
 
     @Override
     public void createShoppingCart(User user) {
@@ -53,12 +54,19 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     @Override
     public CartItemDto addBookToShoppingCart(
             Authentication authentication, CreateCartItemRequestDto createCartDto) {
+        Book bookFromDB = findBookByBookId(createCartDto);
         ShoppingCart shoppingCartFromDB = findShoppingCartByUserId(authentication);
-        CartItem cartItem = cartItemMapper.toEntity(createCartDto);
-        cartItem.setShoppingCart(shoppingCartFromDB);
-        BookDto bookDto = bookService.findById(createCartDto.bookId());
-        cartItem.setBook(bookMapper.toEntityFromBookDto(bookDto));
-        return cartItemMapper.toDto(cartItemService.saveCartItem(cartItem));
+        CartItem cartItemFromDB = shoppingCartFromDB.getCartItems().stream().filter(
+                        cartItem -> cartItem.getBook().getId().equals(bookFromDB.getId()))
+                .findFirst().orElseGet(() -> {
+                    CartItem cartItem = cartItemMapper.toEntity(createCartDto);
+                    cartItem.setShoppingCart(shoppingCartFromDB);
+                    cartItem.setBook(bookFromDB);
+                    return cartItem;
+                });
+        cartItemFromDB.setQuantity(createCartDto.quantity());
+        cartItemRepository.save(cartItemFromDB);
+        return cartItemMapper.toDto(cartItemFromDB);
     }
 
     @Override
@@ -66,19 +74,19 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
             Authentication authentication,
             Long cartItemId,
             UpdateCartItemRequestDto updateCartDto) {
-        CartItem cartItem = cartItemService.findCartItemById(cartItemId);
+        CartItem cartItemFromDB = findCartItemById(cartItemId);
         isShoppingCartContainsCartItem(cartItemId);
-        cartItem.setQuantity(updateCartDto.quantity());
-        cartItemService.saveCartItem(cartItem);
-        return cartItemMapper.toDto(cartItem);
+        cartItemFromDB.setQuantity(updateCartDto.quantity());
+        cartItemRepository.save(cartItemFromDB);
+        return cartItemMapper.toDto(cartItemFromDB);
     }
 
     @Override
     public void deleteBookFromShoppingCart(
             Authentication authentication, Long cartItemId) {
-        CartItem cartItem = cartItemService.findCartItemById(cartItemId);
+        CartItem cartItemFromDB = findCartItemById(cartItemId);
         isShoppingCartContainsCartItem(cartItemId);
-        cartItemService.deleteCartItem(cartItem);
+        cartItemRepository.delete(cartItemFromDB);
     }
 
     private ShoppingCart findShoppingCartByUserId(Authentication authentication) {
@@ -88,17 +96,33 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
                         "Can't find ShoppingCart by userId: " + user.getId()));
     }
 
+    private Book findBookByBookId(CreateCartItemRequestDto createCartDto) {
+        return bookRepository.findById(createCartDto.bookId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Can't find Book by bookId: " + createCartDto.bookId()));
+    }
+
+    private CartItem findCartItemById(Long cartItemId) {
+        return cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Can't find CartItem by cartItemId: " + cartItemId));
+    }
+
+    private List<CartItem> findCartItemsListById(Long shoppingCartId, Pageable pageable) {
+        return cartItemRepository.findListByShoppingCartId(shoppingCartId, pageable);
+    }
+
     public Set<CartItemDto> findSetByShoppingCartId(
             Authentication authentication, Pageable pageable) {
         Long shoppingCartId = findShoppingCartByUserId(authentication).getId();
-        return cartItemService.findCartItemsListById(shoppingCartId, pageable).stream()
+        return findCartItemsListById(shoppingCartId, pageable).stream()
                 .map(cartItemMapper::toDto)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     private void isShoppingCartContainsCartItem(Long cartItemId) {
-        Set<CartItem> cartItemsSetById = cartItemService.findAllCartItemsWithDependencies();
-        CartItem cartItemById = cartItemService.findCartItemById(cartItemId);
+        Set<CartItem> cartItemsSetById = cartItemRepository.findAllCartItemsSet();
+        CartItem cartItemById = findCartItemById(cartItemId);
         if (cartItemsSetById.stream().noneMatch(
                 cartItem -> cartItem.getId().equals(cartItemById.getId()))) {
             throw new EntityNotFoundException(

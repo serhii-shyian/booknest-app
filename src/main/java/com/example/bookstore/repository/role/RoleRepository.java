@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface RoleRepository extends JpaRepository<Role, Long>,
         JpaSpecificationExecutor<Role> {
-    @Query("from Role r "
-            + "where r.name in :rolesList")
-    Set<Role> findByNameContaining(List<Role.RoleName> rolesList);
+    @Query("from Role r where r.name in :rolesList")
+    Set<Role> findAllByNameContaining(List<Role.RoleName> rolesList);
 }
