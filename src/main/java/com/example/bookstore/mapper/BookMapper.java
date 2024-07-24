@@ -20,6 +20,8 @@ public interface BookMapper {
 
     Book toEntity(CreateBookRequestDto bookDto);
 
+    Book toEntityFromBookDto(BookDto bookDto);
+
     List<BookDto> toDtoList(List<Book> books);
 
     @Mapping(target = "id", ignore = true)
