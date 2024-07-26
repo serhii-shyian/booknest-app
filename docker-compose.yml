@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  mysqldb:
+    platform: linux/arm64
+    image: mysql:8.4.0
+    restart: unless-stopped
+    env_file: ./.env
+    environment:
+      - MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
+      - MYSQL_DATABASE=$MYSQL_DATABASE
+    ports:
+      - $MYSQL_DOCKER_PORT:$MYSQL_LOCAL_PORT
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+
+  app:
+    depends_on:
+      mysqldb:
+        condition: service_healthy
+    restart: unless-stopped
+    image: bookstore-app
+    build: .
+    env_file: ./.env
+    ports:
+      - $SPRING_DOCKER_PORT:$SPRING_LOCAL_PORT
+      - $DEBUG_PORT:$DEBUG_PORT
+    environment:
+      SPRING_APPLICATION_JSON: '{
+        "spring.datasource.url": "$MYSQL_DOCKER_PATH:$MYSQL_LOCAL_PORT/$MYSQL_DATABASE",
+        "spring.datasource.username": "$MYSQL_DB_USER",
+        "spring.datasource.password": "$MYSQL_ROOT_PASSWORD",
+        "jwt.expiration": "$JWT_EXPIRATION",
+        "jwt.secret": "$JWT_SECRET"
+      }'
+      JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
