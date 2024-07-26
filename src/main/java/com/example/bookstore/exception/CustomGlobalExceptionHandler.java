@@ -1,7 +1,6 @@
 package com.example.bookstore.exception;
 
 import jakarta.validation.ConstraintViolationException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -58,18 +57,18 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
         return getObjectResponseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
-    protected ResponseEntity<Object> handleSqlIntegrityConstraintViolationException(
-            SQLIntegrityConstraintViolationException ex
-    ) {
-        return getObjectResponseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
     @ExceptionHandler(AccessDeniedException.class)
     protected ResponseEntity<Object> handleAccessDeniedException(
             AccessDeniedException ex
     ) {
         return getObjectResponseEntity(ex.getMessage(), HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(OrderProcessingException.class)
+    protected ResponseEntity<Object> handleOrderProcessingException(
+            OrderProcessingException ex
+    ) {
+        return getObjectResponseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     private ResponseEntity<Object> getObjectResponseEntity(

@@ -41,28 +41,28 @@ public class BookController {
             description = "Getting a list of all available books")
     @PreAuthorize("hasRole('ROLE_USER')")
     public List<BookDto> getAll(@ParameterObject
-                                    @PageableDefault(
-                                            size = 5,
-                                            sort = "title",
-                                            direction = Sort.Direction.ASC)
-                                    Pageable pageable) {
+                                @PageableDefault(
+                                        size = 5,
+                                        sort = "title",
+                                        direction = Sort.Direction.ASC)
+                                Pageable pageable) {
         return bookService.findAll(pageable);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{bookId}")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Get a book by id",
             description = "Getting a book by id if available")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public BookDto getBookById(@PathVariable @Positive Long id) {
-        return bookService.findById(id);
+    public BookDto getBookById(@PathVariable @Positive Long bookId) {
+        return bookService.findById(bookId);
     }
 
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Get all books by parameters",
             description = "Getting a list of all books according to the parameters")
-    @PreAuthorize("hasRole('ROLE_MANAGER')")
+    @PreAuthorize("hasRole('ROLE_USER')")
     public List<BookDto> searchBooks(BookSearchParametersDto searchParameters,
                                      @ParameterObject
                                      @PageableDefault(
@@ -82,22 +82,22 @@ public class BookController {
         return bookService.save(bookDto);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{bookId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Update a book by id",
             description = "Updating a book by id according to the parameters")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public BookDto updateBookById(@PathVariable @Positive Long id,
+    public BookDto updateBookById(@PathVariable @Positive Long bookId,
                                   @RequestBody @Valid CreateBookRequestDto bookDto) {
-        return bookService.updateById(id,bookDto);
+        return bookService.updateById(bookId, bookDto);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{bookId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete a book by id",
             description = "Deleting a book by id if available")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void deleteBookById(@PathVariable @Positive Long id) {
-        bookService.deleteById(id);
+    public void deleteBookById(@PathVariable @Positive Long bookId) {
+        bookService.deleteById(bookId);
     }
 }

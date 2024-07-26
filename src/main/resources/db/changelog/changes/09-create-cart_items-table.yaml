@@ -7,25 +7,19 @@ databaseChangeLog:
               tableName: cart_items
               columns:
                 - column:
-                    name: id
-                    type: bigint
-                    autoIncrement: true
-                    constraints:
-                      primaryKey: true
-                - column:
                     name: shopping_cart_id
                     type: bigint
                     constraints:
-                      references: shopping_carts(id)
-                      foreignKeyName: fk_cart_items_shopping_cart_id
+                      references: shopping_carts(user_id)
+                      foreignKeyName: fk_cart_items_shopping_cart_user_id
                       nullable: false
                 - column:
                     name: book_id
                     type: bigint
                     constraints:
+                      primaryKey: true
                       references: books(id)
                       foreignKeyName: fk_cart_items_book_id
-                      nullable: false
                 - column:
                     name: quantity
                     type: integer

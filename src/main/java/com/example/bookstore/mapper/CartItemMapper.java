@@ -11,7 +11,7 @@ import org.mapstruct.Mapping;
 public interface CartItemMapper {
     CartItem toEntity(CreateCartItemRequestDto cartItemDto);
 
-    @Mapping(source = "cartItem.book.id", target = "bookId")
-    @Mapping(source = "cartItem.book.title", target = "bookTitle")
+    @Mapping(source = "book.id", target = "bookId")
+    @Mapping(source = "book.title", target = "bookTitle")
     CartItemDto toDto(CartItem cartItem);
 }

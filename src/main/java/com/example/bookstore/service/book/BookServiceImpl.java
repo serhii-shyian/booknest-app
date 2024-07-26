@@ -18,8 +18,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
@@ -36,15 +38,14 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookDto findById(Long bookId) {
-        Book bookFromDb = bookRepository.findByIdWithCategory(bookId).orElseThrow(
-                () -> new EntityNotFoundException("Can't find book by id: " + bookId));
+        Book bookFromDb = findBookById(bookId);
         return bookMapper.toDto(bookFromDb);
     }
 
     @Override
     public List<BookDto> findAll(Pageable pageable) {
         return bookMapper.toDtoList(
-                bookRepository.findAllWithCategories(pageable));
+                bookRepository.findAllBy(pageable));
     }
 
     @Override
@@ -57,10 +58,9 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookDto updateById(Long bookId, CreateBookRequestDto bookDto) {
-        Book bookFromDb = bookRepository.findById(bookId).orElseThrow(
-                () -> new EntityNotFoundException("Can't find book by id: " + bookId));
+        Book bookFromDb = findBookById(bookId);
         bookFromDb.setCategories(getCategoriesFromDto(bookDto));
-        bookMapper.updateBookFromDto(bookDto, bookFromDb);
+        bookMapper.updateEntityFromDto(bookDto, bookFromDb);
         return bookMapper.toDto(bookRepository.save(bookFromDb));
     }
 
@@ -73,6 +73,11 @@ public class BookServiceImpl implements BookService {
     public List<BookDto> searchByParameters(BookSearchParametersDto paramsDto, Pageable pageable) {
         Specification<Book> bookSpecification = bookSpecificationBuilder.build(paramsDto);
         return bookMapper.toDtoList(bookRepository.findAll(bookSpecification));
+    }
+
+    private Book findBookById(Long bookId) {
+        return bookRepository.findById(bookId).orElseThrow(
+                () -> new EntityNotFoundException("Can't find book by id: " + bookId));
     }
 
     private Set<Category> getCategoriesFromDto(CreateBookRequestDto bookDto) {

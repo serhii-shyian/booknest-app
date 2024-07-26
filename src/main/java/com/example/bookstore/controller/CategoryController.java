@@ -43,36 +43,36 @@ public class CategoryController {
             description = "Getting a list of all available categories")
     @PreAuthorize("hasRole('ROLE_USER')")
     public List<CategoryDto> getAll(@ParameterObject
-                                        @PageableDefault(
-                                                size = 5,
-                                                sort = "name",
-                                                direction = Sort.Direction.ASC)
-                                        Pageable pageable) {
+                                    @PageableDefault(
+                                            size = 5,
+                                            sort = "name",
+                                            direction = Sort.Direction.ASC)
+                                    Pageable pageable) {
         return categoryService.findAll(pageable);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{categoryId}")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Get a category by id",
             description = "Getting a category by id if available")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public CategoryDto getCategoryById(@PathVariable @Positive Long id) {
-        return categoryService.findById(id);
+    public CategoryDto getCategoryById(@PathVariable @Positive Long categoryId) {
+        return categoryService.findById(categoryId);
     }
 
-    @GetMapping("/{id}/books")
+    @GetMapping("/{categoryId}/books")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Get all books by category id",
             description = "Getting all books by category id if available")
     @PreAuthorize("hasRole('ROLE_USER')")
     public List<BookDtoWithoutCategoryIds> getBooksByCategoryId(
-            @PathVariable @Positive Long id,
+            @PathVariable @Positive Long categoryId,
             @ParameterObject @PageableDefault(
-            size = 5,
-            sort = "title",
-            direction = Sort.Direction.ASC)
+                    size = 5,
+                    sort = "title",
+                    direction = Sort.Direction.ASC)
             Pageable pageable) {
-        return bookService.findAllByCategoryId(id, pageable);
+        return bookService.findAllByCategoryId(categoryId, pageable);
     }
 
     @PostMapping
@@ -84,23 +84,23 @@ public class CategoryController {
         return categoryService.save(categoryDto);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{categoryId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Update a category by id",
             description = "Updating a category by id according to the parameters")
     @PreAuthorize("hasRole('ADMIN')")
     public CategoryDto updateCategoryById(
-            @PathVariable @Positive Long id,
+            @PathVariable @Positive Long categoryId,
             @RequestBody @Valid CreateCategoryRequestDto categoryDto) {
-        return categoryService.updateById(id, categoryDto);
+        return categoryService.updateById(categoryId, categoryDto);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{categoryId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete a category by id",
             description = "Deleting a category by id if available")
     @PreAuthorize("hasRole('ADMIN')")
-    public void deleteCategory(@PathVariable @Positive Long id) {
-        categoryService.deleteById(id);
+    public void deleteCategory(@PathVariable @Positive Long categoryId) {
+        categoryService.deleteById(categoryId);
     }
 }

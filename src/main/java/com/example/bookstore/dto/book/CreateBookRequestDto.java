@@ -22,7 +22,7 @@ public record CreateBookRequestDto(
         @Positive
         BigDecimal price,
         @NotBlank(message = "Description may not be blank")
-        @Length(min = 10, max = 300)
+        @Length(min = 10, max = 255)
         String description,
         @NotBlank(message = "Cover image URL may not be blank")
         @URL

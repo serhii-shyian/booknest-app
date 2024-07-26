@@ -20,12 +20,10 @@ public interface BookMapper {
 
     Book toEntity(CreateBookRequestDto bookDto);
 
-    Book toEntityFromBookDto(BookDto bookDto);
-
     List<BookDto> toDtoList(List<Book> books);
 
-    @Mapping(target = "id", ignore = true)
-    void updateBookFromDto(CreateBookRequestDto bookDto, @MappingTarget Book book);
+    @Mapping(target = "isbn", ignore = true)
+    void updateEntityFromDto(CreateBookRequestDto bookDto, @MappingTarget Book book);
 
     BookDtoWithoutCategoryIds toDtoWithoutCategories(Book book);
 
