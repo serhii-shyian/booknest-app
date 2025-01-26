@@ -61,7 +61,7 @@ public class CategoryServiceTest {
     @DisplayName("""
             Find category by id when category exists
             """)
-    public void findByCategoryId_ExistingCategoryId_ReturnsCategory() {
+    void findByCategoryId_ExistingCategoryId_ReturnsCategory() {
         //Given
         Category category = getCategoryList().get(0);
         CategoryDto expected = getDtoFromCategory(category);
@@ -83,7 +83,7 @@ public class CategoryServiceTest {
     @DisplayName("""
             Find category by id when category does not exists
             """)
-    public void findByCategoryId_NonExistingCategoryId_ThrowsException() {
+    void findByCategoryId_NonExistingCategoryId_ThrowsException() {
         //Given
         Mockito.when(categoryRepository.findById(anyLong()))
                 .thenReturn(Optional.empty());
@@ -98,7 +98,7 @@ public class CategoryServiceTest {
     @DisplayName("""
             Find all categories by valid parameters when categories exists
             """)
-    public void getAllCategories_ValidPageable_ReturnsAllCategories() {
+    void getAllCategories_ValidPageable_ReturnsAllCategories() {
         //Given
         Category firstCategory = getCategoryList().get(0);
         Category secondCategory = getCategoryList().get(1);
@@ -123,7 +123,7 @@ public class CategoryServiceTest {
     @DisplayName("""
             Update category by id when category id exists
             """)
-    public void updateCategory_ExistingId_ReturnsCategoryDto() {
+    void updateCategory_ExistingId_ReturnsCategoryDto() {
         //Given
         CreateCategoryRequestDto requestDto = getCreateCategoryRequestDto();
         Category category = getCategoryList().get(0);
@@ -147,7 +147,7 @@ public class CategoryServiceTest {
     @DisplayName("""
             Update category by id when category id does not exists
             """)
-    public void updateCategory_NonExistingId_ThrowsException() {
+    void updateCategory_NonExistingId_ThrowsException() {
         //Given
         CreateCategoryRequestDto requestDto = getCreateCategoryRequestDto();
 
@@ -163,7 +163,7 @@ public class CategoryServiceTest {
     @DisplayName("""
             Delete category by id when category id exists
             """)
-    public void deleteCategory_ExistingId_ReturnsNothing() {
+    void deleteCategory_ExistingId_ReturnsNothing() {
         //Given
         Category category = getCategoryList().get(0);
 
@@ -181,7 +181,7 @@ public class CategoryServiceTest {
     @DisplayName("""
             Delete category by id when category id does not exists
             """)
-    public void deleteCategory_NonExistingId_ThrowsException() {
+    void deleteCategory_NonExistingId_ThrowsException() {
         //Given
         Mockito.when(categoryRepository.findById(anyLong()))
                 .thenReturn(Optional.empty());

@@ -128,7 +128,7 @@ public class CategoryControllerTest {
                 result.getResponse()
                         .getContentAsByteArray(), CategoryDto.class);
         Assertions.assertNotNull(actual);
-        EqualsBuilder.reflectionEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
     }
 
     @Test
@@ -230,7 +230,7 @@ public class CategoryControllerTest {
                 result.getResponse()
                         .getContentAsByteArray(), CategoryDto.class);
         Assertions.assertNotNull(actual);
-        EqualsBuilder.reflectionEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
     }
 
     @Test

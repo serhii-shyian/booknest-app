@@ -141,7 +141,7 @@ class BookControllerTest {
                 result.getResponse()
                         .getContentAsByteArray(), BookDto.class);
         Assertions.assertNotNull(actual);
-        EqualsBuilder.reflectionEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
     }
 
     @Test
@@ -149,7 +149,7 @@ class BookControllerTest {
     @DisplayName("""
             Search books with valid parameters when books exists
             """)
-    @WithMockUser(roles = "USER")
+    @WithMockUser(username = "user")
     public void searchBooks_ValidParams_ReturnsBookDtoList() throws Exception {
         //Given
         List<BookDto> expected = List.of(getBookDtoList().get(1));
@@ -227,7 +227,7 @@ class BookControllerTest {
                 result.getResponse()
                         .getContentAsByteArray(), BookDto.class);
         Assertions.assertNotNull(actual);
-        EqualsBuilder.reflectionEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
     }
 
     @Test
@@ -273,6 +273,7 @@ class BookControllerTest {
 
     private BookDto getBookDtoFromRequestDto(CreateBookRequestDto requestDto) {
         return new BookDto()
+                .setId(1L)
                 .setTitle(requestDto.title())
                 .setAuthor(requestDto.author())
                 .setIsbn(requestDto.isbn())

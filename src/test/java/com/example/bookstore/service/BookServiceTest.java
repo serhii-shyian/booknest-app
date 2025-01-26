@@ -159,7 +159,7 @@ public class BookServiceTest {
     @DisplayName("""
             Update book by id when book id exists
             """)
-    public void updateBook_ExistingId_ReturnsBookDto() {
+    void updateBook_ExistingId_ReturnsBookDto() {
         //Given
         Book book = getBookList().get(0);
         book.setTitle("Sample Book 123");
@@ -185,7 +185,7 @@ public class BookServiceTest {
     @DisplayName("""
             Update book by id when book id does not exists
             """)
-    public void updateBook_NonExistingId_ThrowsException() {
+    void updateBook_NonExistingId_ThrowsException() {
         //Given
         CreateBookRequestDto requestDto = getCreateBookRequestDto();
 
@@ -201,7 +201,7 @@ public class BookServiceTest {
     @DisplayName("""
             Delete book by id when book id exists
             """)
-    public void deleteBook_ExistingId_ReturnsNothing() {
+    void deleteBook_ExistingId_ReturnsNothing() {
         //Given
         Book book = getBookList().get(0);
 
@@ -219,7 +219,7 @@ public class BookServiceTest {
     @DisplayName("""
             Delete book by id when book id does not exists
             """)
-    public void deleteBook_NonExistingId_ThrowsException() {
+    void deleteBook_NonExistingId_ThrowsException() {
         //Given
         Mockito.when(bookRepository.findById(anyLong()))
                 .thenReturn(Optional.empty());
@@ -234,7 +234,7 @@ public class BookServiceTest {
     @DisplayName("""
             Search books with valid params when books exists
             """)
-    public void searchBooks_ValidBookParams_ReturnsBookDtoList() {
+    void searchBooks_ValidBookParams_ReturnsBookDtoList() {
         //Given
         Book firstBook = getBookList().get(0);
         Book secondBook = getBookList().get(1);

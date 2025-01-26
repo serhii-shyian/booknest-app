@@ -14,6 +14,7 @@ import com.example.bookstore.model.User;
 import com.example.bookstore.repository.book.BookRepository;
 import com.example.bookstore.repository.cartitem.CartItemRepository;
 import com.example.bookstore.repository.shoppingcart.ShoppingCartRepository;
+import com.example.bookstore.repository.user.UserRepository;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,12 +35,13 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     private final CartItemRepository cartItemRepository;
     private final CartItemMapper cartItemMapper;
     private final BookRepository bookRepository;
+    private final UserRepository userRepository;
 
     @Override
-    public void createShoppingCart(User user) {
+    public ShoppingCart createShoppingCart(User user) {
         ShoppingCart shoppingCart = new ShoppingCart();
         shoppingCart.setUser(user);
-        shoppingCartRepository.save(shoppingCart);
+        return shoppingCartRepository.save(shoppingCart);
     }
 
     @Override
@@ -90,10 +93,19 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     private ShoppingCart findShoppingCartByUserId(Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
-        return shoppingCartRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Can't find ShoppingCart by userId: " + user.getId()));
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof UserDetails) {
+            String username = ((UserDetails) principal).getUsername();
+            User user = userRepository.findByEmail(username)
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "User not found with username: " + username));
+            return shoppingCartRepository.findByUserId(user.getId())
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "Can't find ShoppingCart by userId: " + user.getId()));
+        } else {
+            throw new EntityNotFoundException(
+                    "Authenticated principal is not a UserDetails instance");
+        }
     }
 
     private Book findBookByBookId(CreateCartItemRequestDto createCartDto) {
@@ -121,9 +133,9 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     private void isShoppingCartContainsCartItem(Long cartItemId) {
-        Set<CartItem> cartItemsSetById = cartItemRepository.findAllCartItemsSet();
+        List<CartItem> cartItemsListById = cartItemRepository.findAll();
         CartItem cartItemById = findCartItemById(cartItemId);
-        if (cartItemsSetById.stream().noneMatch(
+        if (cartItemsListById.stream().noneMatch(
                 cartItem -> cartItem.getId().equals(cartItemById.getId()))) {
             throw new EntityNotFoundException(
                     "Can't find CartItem in the ShoppingCart by id: " + cartItemId);

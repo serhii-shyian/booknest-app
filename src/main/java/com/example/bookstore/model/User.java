@@ -17,6 +17,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +31,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Getter
 @Setter
 @ToString
+@Accessors(chain = true)
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
