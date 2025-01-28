@@ -1,5 +1,8 @@
 package com.example.bookstore.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -18,7 +21,6 @@ import java.util.Set;
 import javax.sql.DataSource;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
@@ -31,6 +33,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -95,7 +98,8 @@ public class ShoppingCartControllerTest {
     @DisplayName("""
             Get ShoppingCart by user id when user exists
             """)
-    @WithMockUser(username = "user@i.ua")
+    @WithUserDetails(value = "user@i.ua",
+            userDetailsServiceBeanName = "customUserDetailsService")
     @Sql(
             scripts = "classpath:database/cartitems/insert-into-cart_items.sql",
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
@@ -121,8 +125,8 @@ public class ShoppingCartControllerTest {
                 result.getResponse()
                         .getContentAsByteArray(), ShoppingCartDto.class
         );
-        Assertions.assertNotNull(actual);
-        Assertions.assertEquals(expected, actual);
+        assertNotNull(actual);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -130,7 +134,8 @@ public class ShoppingCartControllerTest {
     @DisplayName("""
             Add book to ShoppingCart when book exists
             """)
-    @WithMockUser(username = "user@i.ua")
+    @WithUserDetails(value = "user@i.ua",
+            userDetailsServiceBeanName = "customUserDetailsService")
     @Sql(
             scripts = "classpath:database/cartitems/delete-from-cart_items.sql",
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
@@ -155,12 +160,37 @@ public class ShoppingCartControllerTest {
                 result.getResponse()
                         .getContentAsByteArray(), CartItemDto.class
         );
-        Assertions.assertNotNull(actual);
-        Assertions.assertEquals(expected, actual);
+        assertNotNull(actual);
+        assertEquals(expected, actual);
     }
 
     @Test
     @Order(3)
+    @DisplayName("""
+            Add book to ShoppingCart when book does not exist
+            """)
+    @WithMockUser(username = "user@i.ua")
+    @Sql(
+            scripts = "classpath:database/cartitems/delete-from-cart_items.sql",
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
+    )
+    void addBookToShoppingCart_NonExistingBook_ReturnsNotFound() throws Exception {
+        // Given
+        CreateCartItemRequestDto requestDto = getCreateCartItemRequestDtoWithNonExistingBookId();
+        String jsonRequest = objectMapper.writeValueAsString(requestDto);
+
+        // When
+        mockMvc.perform(
+                        post("/cart")
+                                .content(jsonRequest)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                // Then
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @Order(4)
     @DisplayName("""
             Update the book quantity in ShoppingCart when given valid quantity
             """)
@@ -198,12 +228,42 @@ public class ShoppingCartControllerTest {
                 result.getResponse()
                         .getContentAsByteArray(), CartItemDto.class
         );
-        Assertions.assertNotNull(actual);
-        Assertions.assertEquals(expected, actual);
+        assertNotNull(actual);
+        assertEquals(expected, actual);
     }
 
     @Test
-    @Order(4)
+    @Order(5)
+    @DisplayName("""
+            Update the book quantity in ShoppingCart when given invalid quantity
+            """)
+    @WithMockUser(username = "user@i.ua")
+    @Sql(
+            scripts = "classpath:database/cartitems/insert-into-cart_items.sql",
+            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
+    )
+    @Sql(
+            scripts = "classpath:database/cartitems/delete-from-cart_items.sql",
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
+    )
+    void updateBookInShoppingCart_InvalidQuantity_ReturnsBadRequest() throws Exception {
+        // Given
+        UpdateCartItemRequestDto requestDto =
+                new UpdateCartItemRequestDto(-3);
+        String jsonRequest = objectMapper.writeValueAsString(requestDto);
+
+        // When
+        mockMvc.perform(
+                        put("/cart/items/1")
+                                .content(jsonRequest)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                // Then
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Order(6)
     @DisplayName("""
             Delete book from ShoppingCart when book exists
             """)
@@ -227,7 +287,31 @@ public class ShoppingCartControllerTest {
 
         //Then
         String actual = result.getResponse().getContentAsString();
-        Assertions.assertTrue(actual.isEmpty());
+        assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    @Order(7)
+    @DisplayName("""
+            Delete book from ShoppingCart when book does not exist
+            """)
+    @WithMockUser(username = "user@i.ua")
+    @Sql(
+            scripts = "classpath:database/cartitems/insert-into-cart_items.sql",
+            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
+    )
+    @Sql(
+            scripts = "classpath:database/cartitems/delete-from-cart_items.sql",
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
+    )
+    void deleteBookFromShoppingCart_NonExistingCartItemId_ReturnsNotFound() throws Exception {
+        //When
+        mockMvc.perform(
+                        delete("/cart/items/999")
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                // Then
+                .andExpect(status().isNotFound());
     }
 
     private ShoppingCartDto getShoppingCartDto() {
@@ -248,6 +332,12 @@ public class ShoppingCartControllerTest {
     private CreateCartItemRequestDto getCreateCartItemRequestDto() {
         return new CreateCartItemRequestDto(
                 1L,
+                1);
+    }
+
+    private CreateCartItemRequestDto getCreateCartItemRequestDtoWithNonExistingBookId() {
+        return new CreateCartItemRequestDto(
+                99L,
                 1);
     }
 }

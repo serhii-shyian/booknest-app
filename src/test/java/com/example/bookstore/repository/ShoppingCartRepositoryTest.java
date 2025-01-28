@@ -1,12 +1,19 @@
 package com.example.bookstore.repository;
 
+import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import com.example.bookstore.exception.EntityNotFoundException;
+import com.example.bookstore.model.Book;
+import com.example.bookstore.model.CartItem;
 import com.example.bookstore.model.ShoppingCart;
+import com.example.bookstore.model.User;
 import com.example.bookstore.repository.shoppingcart.ShoppingCartRepository;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Set;
 import javax.sql.DataSource;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,9 +53,11 @@ public class ShoppingCartRepositoryTest {
     )
     void findByUserId_GivenValidUserId_ShouldReturnShoppingCart() {
         //Given
-        ShoppingCart expected = shoppingCartRepository.findById(2L)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Can't find a shopping cart by id " + 2L));
+        Book book = getBook();
+        User user = getUser();
+        ShoppingCart shoppingCart = getShoppingCart(user);
+        CartItem cartItem = getCartItem(shoppingCart, book);
+        ShoppingCart expected = shoppingCart.setCartItems(Set.of(cartItem));
 
         //When
         ShoppingCart actual = shoppingCartRepository.findByUserId(2L)
@@ -56,7 +65,42 @@ public class ShoppingCartRepositoryTest {
                         "Can't find a shopping cart by userId " + 2L));
 
         //Then
-        Assertions.assertNotNull(actual);
-        Assertions.assertEquals(expected, actual);
+        assertNotNull(actual);
+        reflectionEquals(expected, actual);
+    }
+
+    private Book getBook() {
+        return new Book()
+                .setId(1L)
+                .setTitle("Sample Book 1")
+                .setAuthor("Author A")
+                .setIsbn("978-1-23-456789-7")
+                .setPrice(BigDecimal.valueOf(19.99))
+                .setDescription("This is a sample book description.")
+                .setCoverImage("http://example.com/cover1.jpg");
+    }
+
+    private User getUser() {
+        return new User()
+                .setId(2L)
+                .setEmail("user@i.ua")
+                .setPassword("qwerty123")
+                .setFirstName("John")
+                .setLastName("Smith")
+                .setShippingAddress("Ukraine");
+    }
+
+    private ShoppingCart getShoppingCart(User user) {
+        return new ShoppingCart()
+                .setId(user.getId())
+                .setUser(user);
+    }
+
+    private CartItem getCartItem(ShoppingCart shoppingCart, Book book) {
+        return new CartItem()
+                .setId(1L)
+                .setShoppingCart(shoppingCart)
+                .setBook(book)
+                .setQuantity(6);
     }
 }
