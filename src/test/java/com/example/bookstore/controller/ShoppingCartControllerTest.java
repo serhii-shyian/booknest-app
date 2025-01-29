@@ -32,7 +32,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
@@ -169,7 +168,8 @@ public class ShoppingCartControllerTest {
     @DisplayName("""
             Add book to ShoppingCart when book does not exist
             """)
-    @WithMockUser(username = "user@i.ua")
+    @WithUserDetails(value = "user@i.ua",
+            userDetailsServiceBeanName = "customUserDetailsService")
     @Sql(
             scripts = "classpath:database/cartitems/delete-from-cart_items.sql",
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
@@ -194,7 +194,8 @@ public class ShoppingCartControllerTest {
     @DisplayName("""
             Update the book quantity in ShoppingCart when given valid quantity
             """)
-    @WithMockUser(username = "user@i.ua")
+    @WithUserDetails(value = "user@i.ua",
+            userDetailsServiceBeanName = "customUserDetailsService")
     @Sql(
             scripts = "classpath:database/cartitems/insert-into-cart_items.sql",
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
@@ -237,7 +238,8 @@ public class ShoppingCartControllerTest {
     @DisplayName("""
             Update the book quantity in ShoppingCart when given invalid quantity
             """)
-    @WithMockUser(username = "user@i.ua")
+    @WithUserDetails(value = "user@i.ua",
+            userDetailsServiceBeanName = "customUserDetailsService")
     @Sql(
             scripts = "classpath:database/cartitems/insert-into-cart_items.sql",
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
@@ -267,7 +269,8 @@ public class ShoppingCartControllerTest {
     @DisplayName("""
             Delete book from ShoppingCart when book exists
             """)
-    @WithMockUser(username = "user@i.ua")
+    @WithUserDetails(value = "user@i.ua",
+            userDetailsServiceBeanName = "customUserDetailsService")
     @Sql(
             scripts = "classpath:database/cartitems/insert-into-cart_items.sql",
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
@@ -295,7 +298,8 @@ public class ShoppingCartControllerTest {
     @DisplayName("""
             Delete book from ShoppingCart when book does not exist
             """)
-    @WithMockUser(username = "user@i.ua")
+    @WithUserDetails(value = "user@i.ua",
+            userDetailsServiceBeanName = "customUserDetailsService")
     @Sql(
             scripts = "classpath:database/cartitems/insert-into-cart_items.sql",
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD

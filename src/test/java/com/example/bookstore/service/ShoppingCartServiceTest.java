@@ -34,7 +34,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
 
 @ExtendWith(MockitoExtension.class)
 public class ShoppingCartServiceTest {
@@ -49,29 +48,7 @@ public class ShoppingCartServiceTest {
     @Mock
     private CartItemMapper cartItemMapper;
     @Mock
-    private Authentication authentication;
-    @Mock
     private BookRepository bookRepository;
-
-    @Test
-    @DisplayName("""
-            Create ShoppingCart when given valid user
-            """)
-    public void createShoppingCart_ValidUser_CreatesShoppingCart() {
-        //Given
-        User user = getTestUser();
-        ShoppingCart shoppingCart = new ShoppingCart().setUser(user);
-        ShoppingCart expected = getShoppingCart(user);
-
-        when(shoppingCartRepository.save(shoppingCart)).thenReturn(expected);
-
-        //When
-        ShoppingCart actual = shoppingCartService.createShoppingCart(user);
-
-        //Then
-        assertEquals(expected, actual);
-        verify(shoppingCartRepository, times(1)).save(shoppingCart);
-    }
 
     @Test
     @DisplayName("""
@@ -90,7 +67,6 @@ public class ShoppingCartServiceTest {
                 .setUserId(shoppingCart.getUser().getId())
                 .setCartItems(Set.of(cartItemDto));
 
-        when(authentication.getPrincipal()).thenReturn(user);
         when(shoppingCartRepository.findByUserId(user.getId()))
                 .thenReturn(Optional.of(shoppingCart));
         when(shoppingCartMapper.toDto(shoppingCart)).thenReturn(expected);
@@ -99,12 +75,11 @@ public class ShoppingCartServiceTest {
         when(cartItemMapper.toDto(cartItem)).thenReturn(cartItemDto);
 
         //When
-        ShoppingCartDto actual = shoppingCartService.findShoppingCart(authentication, pageable);
+        ShoppingCartDto actual = shoppingCartService.findShoppingCart(user, pageable);
 
         //Then
         assertNotNull(actual);
         assertEquals(expected, actual);
-        verify(authentication, times(2)).getPrincipal();
         verify(shoppingCartRepository, times(2)).findByUserId(user.getId());
         verify(shoppingCartMapper, times(1)).toDto(shoppingCart);
         verify(cartItemRepository, times(1)).findListByShoppingCartId(expected.getId(), pageable);
@@ -119,15 +94,13 @@ public class ShoppingCartServiceTest {
         //Given
         User user = getTestUser();
 
-        when(authentication.getPrincipal()).thenReturn(user);
         when(shoppingCartRepository.findByUserId(user.getId()))
                 .thenReturn(Optional.empty());
 
         //Then
         Pageable pageable = PageRequest.of(0, 5);
         assertThrows(EntityNotFoundException.class,
-                () -> shoppingCartService.findShoppingCart(authentication, pageable));
-        verify(authentication, times(1)).getPrincipal();
+                () -> shoppingCartService.findShoppingCart(user, pageable));
         verify(shoppingCartRepository, times(1)).findByUserId(user.getId());
     }
 
@@ -144,7 +117,6 @@ public class ShoppingCartServiceTest {
         CartItem cartItem = getCartItem(shoppingCart, book);
         CartItemDto expected = getCartItemDto(cartItem);
 
-        when(authentication.getPrincipal()).thenReturn(user);
         when(shoppingCartRepository.findByUserId(user.getId()))
                 .thenReturn(Optional.of(shoppingCart));
         when(bookRepository.findById(requestDto.bookId()))
@@ -154,12 +126,11 @@ public class ShoppingCartServiceTest {
 
         //When
         CartItemDto actual = shoppingCartService
-                .addBookToShoppingCart(authentication, requestDto);
+                .addBookToShoppingCart(user, requestDto);
 
         //Then
         assertNotNull(actual);
         assertEquals(expected, actual);
-        verify(authentication, times(1)).getPrincipal();
         verify(shoppingCartRepository, times(1)).findByUserId(user.getId());
         verify(bookRepository, times(1)).findById(requestDto.bookId());
         verify(cartItemMapper, times(1)).toEntity(requestDto);
@@ -172,6 +143,7 @@ public class ShoppingCartServiceTest {
             """)
     void addBookToShoppingCart_NonExistingBook_ThrowsException() {
         //Given
+        User user = new User();
         Book book = getBook();
         CreateCartItemRequestDto requestDto = getCartItemRequestDto(book.setId(99L));
 
@@ -180,7 +152,7 @@ public class ShoppingCartServiceTest {
 
         //Then
         assertThrows(EntityNotFoundException.class, () -> shoppingCartService
-                .addBookToShoppingCart(authentication, requestDto));
+                .addBookToShoppingCart(user, requestDto));
         verify(bookRepository, times(1)).findById(requestDto.bookId());
     }
 
@@ -208,7 +180,7 @@ public class ShoppingCartServiceTest {
 
         //When
         CartItemDto actual = shoppingCartService
-                .updateBookInShoppingCart(authentication, cartItem.getId(), updateRequestDto);
+                .updateBookInShoppingCart(user, cartItem.getId(), updateRequestDto);
 
         //Then
         assertNotNull(actual);
@@ -216,6 +188,27 @@ public class ShoppingCartServiceTest {
         verify(cartItemRepository, times(2)).findById(cartItem.getId());
         verify(cartItemRepository, times(1)).findAll();
         verify(cartItemMapper, times(1)).toDto(cartItem);
+    }
+
+    @Test
+    @DisplayName("""
+            Update book in ShoppingCart when cart item does not exist
+            """)
+    void updateBookInShoppingCart_NonExistingCartItem_ThrowsException() {
+        //Given
+        User user = getTestUser();
+        ShoppingCart shoppingCart = getShoppingCart(user);
+        Book book = getBook();
+        CartItem cartItem = getCartItem(shoppingCart, book);
+        UpdateCartItemRequestDto updateRequestDto = new UpdateCartItemRequestDto(10);
+
+        when(cartItemRepository.findById(cartItem.getId()))
+                .thenReturn(Optional.empty());
+
+        //Then
+        assertThrows(EntityNotFoundException.class, () -> shoppingCartService
+                .updateBookInShoppingCart(user, cartItem.getId(), updateRequestDto));
+        verify(cartItemRepository, times(1)).findById(cartItem.getId());
     }
 
     @Test
@@ -234,12 +227,33 @@ public class ShoppingCartServiceTest {
         when(cartItemRepository.findAll()).thenReturn(List.of(cartItem));
 
         //When
-        shoppingCartService.deleteBookFromShoppingCart(authentication, cartItem.getId());
+        shoppingCartService.deleteBookFromShoppingCart(user, cartItem.getId());
 
         //Then
         verify(cartItemRepository, times(2)).findById(cartItem.getId());
         verify(cartItemRepository, times(1)).findAll();
         verify(cartItemRepository, times(1)).delete(cartItem);
+    }
+
+    @Test
+    @DisplayName("""
+            Delete book from ShoppingCart when CartItem Id does not exist
+            """)
+    void deleteBookFromShoppingCart_NonExistingId_ThrowsException() {
+        //Given
+        User user = getTestUser();
+        ShoppingCart shoppingCart = getShoppingCart(user);
+        Book book = getBook();
+        CartItem cartItem = getCartItem(shoppingCart, book);
+
+        when(cartItemRepository.findById(cartItem.getId()))
+                .thenReturn(Optional.empty());
+
+        //Then
+        assertThrows(EntityNotFoundException.class, () -> {
+            shoppingCartService.deleteBookFromShoppingCart(user, cartItem.getId());
+        });
+        verify(cartItemRepository, times(1)).findById(cartItem.getId());
     }
 
     private User getTestUser() {

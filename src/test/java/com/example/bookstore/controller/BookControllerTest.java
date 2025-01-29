@@ -200,7 +200,8 @@ class BookControllerTest {
                         .getContentAsByteArray(), BookDto.class);
         assertNotNull(actual);
         assertNotNull(actual.getId());
-        reflectionEquals(expected, actual, "id");
+        assertTrue(reflectionEquals(expected, actual, "id"),
+                "Expected and actual BookDto should be equal.");
     }
 
     @Test

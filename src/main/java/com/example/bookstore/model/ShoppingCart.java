@@ -11,7 +11,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -40,20 +39,4 @@ public class ShoppingCart {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<CartItem> cartItems = new HashSet<>();
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ShoppingCart that = (ShoppingCart) o;
-        return Objects.equals(id, that.id)
-                && Objects.equals(user, that.user)
-                && Objects.equals(cartItems, that.cartItems);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, user, cartItems);
-    }
 }

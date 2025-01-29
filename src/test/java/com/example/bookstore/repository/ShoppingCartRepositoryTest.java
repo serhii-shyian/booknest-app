@@ -1,6 +1,6 @@
 package com.example.bookstore.repository;
 
-import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.example.bookstore.exception.EntityNotFoundException;
@@ -66,7 +66,10 @@ public class ShoppingCartRepositoryTest {
 
         //Then
         assertNotNull(actual);
-        reflectionEquals(expected, actual);
+        assertThat(actual)
+                .usingRecursiveComparison()
+                .ignoringFields("user", "cartItems")
+                .isEqualTo(expected);
     }
 
     private Book getBook() {

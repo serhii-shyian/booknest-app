@@ -203,7 +203,8 @@ public class CategoryControllerTest {
                         .getContentAsByteArray(), CategoryDto.class);
         assertNotNull(actual);
         assertNotNull(actual.id());
-        reflectionEquals(expected, actual, "id");
+        assertTrue(reflectionEquals(expected, actual, "id"),
+                "Expected and actual CategoryDto should be equal.");
     }
 
     @Test

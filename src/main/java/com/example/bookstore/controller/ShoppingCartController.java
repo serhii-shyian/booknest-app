@@ -4,6 +4,7 @@ import com.example.bookstore.dto.cartitem.CartItemDto;
 import com.example.bookstore.dto.cartitem.CreateCartItemRequestDto;
 import com.example.bookstore.dto.cartitem.UpdateCartItemRequestDto;
 import com.example.bookstore.dto.shoppingcart.ShoppingCartDto;
+import com.example.bookstore.model.User;
 import com.example.bookstore.service.shoppingcart.ShoppingCartService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -48,7 +49,8 @@ public class ShoppingCartController {
                                                        sort = "book",
                                                        direction = Sort.Direction.ASC)
                                                Pageable pageable) {
-        return shoppingCartService.findShoppingCart(authentication, pageable);
+        User user = (User) authentication.getPrincipal();
+        return shoppingCartService.findShoppingCart(user, pageable);
     }
 
     @PostMapping
@@ -59,7 +61,8 @@ public class ShoppingCartController {
     public CartItemDto addBookToShoppingCart(
             Authentication authentication,
             @RequestBody @Valid CreateCartItemRequestDto createCartDto) {
-        return shoppingCartService.addBookToShoppingCart(authentication, createCartDto);
+        User user = (User) authentication.getPrincipal();
+        return shoppingCartService.addBookToShoppingCart(user, createCartDto);
     }
 
     @PutMapping("/items/{cartItemId}")
@@ -71,8 +74,9 @@ public class ShoppingCartController {
             Authentication authentication,
             @PathVariable @Positive Long cartItemId,
             @RequestBody @Valid UpdateCartItemRequestDto requestDto) {
+        User user = (User) authentication.getPrincipal();
         return shoppingCartService.updateBookInShoppingCart(
-                authentication, cartItemId, requestDto);
+                user, cartItemId, requestDto);
     }
 
     @DeleteMapping("/items/{cartItemId}")
@@ -82,6 +86,7 @@ public class ShoppingCartController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public void deleteBookFromShoppingCart(Authentication authentication,
                                            @PathVariable @Valid Long cartItemId) {
-        shoppingCartService.deleteBookFromShoppingCart(authentication, cartItemId);
+        User user = (User) authentication.getPrincipal();
+        shoppingCartService.deleteBookFromShoppingCart(user, cartItemId);
     }
 }
