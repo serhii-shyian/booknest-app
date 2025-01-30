@@ -1,5 +1,9 @@
 package com.example.bookstore.controller;
 
+import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -19,9 +23,7 @@ import java.util.List;
 import java.util.Set;
 import javax.sql.DataSource;
 import lombok.SneakyThrows;
-import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
@@ -114,8 +116,8 @@ class BookControllerTest {
         BookDto[] actual = objectMapper.readValue(
                 result.getResponse()
                         .getContentAsByteArray(), BookDto[].class);
-        Assertions.assertEquals(3, actual.length);
-        Assertions.assertEquals(expected, Arrays.stream(actual).toList());
+        assertEquals(3, actual.length);
+        assertEquals(expected, Arrays.stream(actual).toList());
     }
 
     @Test
@@ -140,8 +142,8 @@ class BookControllerTest {
         BookDto actual = objectMapper.readValue(
                 result.getResponse()
                         .getContentAsByteArray(), BookDto.class);
-        Assertions.assertNotNull(actual);
-        EqualsBuilder.reflectionEquals(expected, actual);
+        assertNotNull(actual);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -149,7 +151,7 @@ class BookControllerTest {
     @DisplayName("""
             Search books with valid parameters when books exists
             """)
-    @WithMockUser(roles = "USER")
+    @WithMockUser(username = "user")
     public void searchBooks_ValidParams_ReturnsBookDtoList() throws Exception {
         //Given
         List<BookDto> expected = List.of(getBookDtoList().get(1));
@@ -168,7 +170,7 @@ class BookControllerTest {
         List<BookDto> actual = objectMapper.readValue(
                 result.getResponse()
                         .getContentAsString(), new TypeReference<>() {});
-        Assertions.assertEquals(expected, actual);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -196,9 +198,10 @@ class BookControllerTest {
         BookDto actual = objectMapper.readValue(
                 result.getResponse()
                         .getContentAsByteArray(), BookDto.class);
-        Assertions.assertNotNull(actual);
-        Assertions.assertNotNull(actual.getId());
-        EqualsBuilder.reflectionEquals(expected, actual, "id");
+        assertNotNull(actual);
+        assertNotNull(actual.getId());
+        assertTrue(reflectionEquals(expected, actual, "id"),
+                "Expected and actual BookDto should be equal.");
     }
 
     @Test
@@ -226,8 +229,8 @@ class BookControllerTest {
         BookDto actual = objectMapper.readValue(
                 result.getResponse()
                         .getContentAsByteArray(), BookDto.class);
-        Assertions.assertNotNull(actual);
-        EqualsBuilder.reflectionEquals(expected, actual);
+        assertNotNull(actual);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -247,7 +250,7 @@ class BookControllerTest {
 
         //Then
         String actual = result.getResponse().getContentAsString();
-        Assertions.assertTrue(actual.isEmpty());
+        assertTrue(actual.isEmpty());
     }
 
     private List<CreateBookRequestDto> getCreateBookRequestDtoList() {
@@ -273,6 +276,7 @@ class BookControllerTest {
 
     private BookDto getBookDtoFromRequestDto(CreateBookRequestDto requestDto) {
         return new BookDto()
+                .setId(1L)
                 .setTitle(requestDto.title())
                 .setAuthor(requestDto.author())
                 .setIsbn(requestDto.isbn())

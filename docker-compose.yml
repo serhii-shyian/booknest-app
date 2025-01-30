@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   mysqldb:
-    platform: linux/arm64
+    platform: linux
     image: mysql:8.4.0
     restart: unless-stopped
     env_file: ./.env

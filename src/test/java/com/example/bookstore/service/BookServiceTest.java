@@ -2,7 +2,10 @@ package com.example.bookstore.service;
 
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import com.example.bookstore.dto.book.BookDto;
 import com.example.bookstore.dto.book.BookDtoWithoutCategoryIds;
@@ -19,13 +22,11 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -54,16 +55,16 @@ public class BookServiceTest {
         Book book = getBookFromDto(requestDto);
         BookDto expected = getDtoFromBook(book);
 
-        Mockito.when(bookMapper.toEntity(requestDto)).thenReturn(book);
-        Mockito.when(bookRepository.save(book)).thenReturn(book);
-        Mockito.when(bookMapper.toDto(book)).thenReturn(expected);
+        when(bookMapper.toEntity(requestDto)).thenReturn(book);
+        when(bookRepository.save(book)).thenReturn(book);
+        when(bookMapper.toDto(book)).thenReturn(expected);
 
         //When
         BookDto actual = bookService.save(requestDto);
 
         //Then
-        Assertions.assertEquals(expected, actual);
-        Mockito.verifyNoMoreInteractions(bookRepository, bookMapper);
+        assertEquals(expected, actual);
+        verifyNoMoreInteractions(bookRepository, bookMapper);
     }
 
     @Test
@@ -75,17 +76,17 @@ public class BookServiceTest {
         Book book = getBookList().get(0);
         BookDto expected = getDtoFromBook(book);
 
-        Mockito.when(bookRepository.findById(anyLong()))
+        when(bookRepository.findById(book.getId()))
                 .thenReturn(Optional.of(book));
-        Mockito.when(bookMapper.toDto(book))
+        when(bookMapper.toDto(book))
                 .thenReturn(expected);
 
         //When
-        BookDto actual = bookService.findById(anyLong());
+        BookDto actual = bookService.findById(book.getId());
 
         //Then
         assertEquals(expected, actual);
-        Mockito.verifyNoMoreInteractions(bookRepository, bookMapper);
+        verifyNoMoreInteractions(bookRepository, bookMapper);
     }
 
     @Test
@@ -94,13 +95,13 @@ public class BookServiceTest {
             """)
     public void findBook_NonExistingBookId_ThrowsException() {
         //Given
-        Mockito.when(bookRepository.findById(anyLong()))
+        when(bookRepository.findById(99L))
                 .thenReturn(Optional.empty());
 
         //Then
         assertThrows(EntityNotFoundException.class,
-                () -> bookService.findById(anyLong()));
-        Mockito.verifyNoMoreInteractions(bookRepository);
+                () -> bookService.findById(99L));
+        verifyNoMoreInteractions(bookRepository);
     }
 
     @Test
@@ -118,15 +119,15 @@ public class BookServiceTest {
         Page<Book> page = new PageImpl<>(bookList);
         List<BookDto> expected = List.of(firstBookDto, secondBookDto);
 
-        Mockito.when(bookRepository.findAll(pageable)).thenReturn(page);
-        Mockito.when(bookMapper.toDtoList(bookList)).thenReturn(expected);
+        when(bookRepository.findAll(pageable)).thenReturn(page);
+        when(bookMapper.toDtoList(bookList)).thenReturn(expected);
 
         //When
         List<BookDto> actual = bookService.findAll(Pageable.ofSize(5));
 
         //Then
         assertEquals(expected, actual);
-        Mockito.verifyNoMoreInteractions(bookRepository, bookMapper);
+        verifyNoMoreInteractions(bookRepository, bookMapper);
     }
 
     @Test
@@ -141,9 +142,9 @@ public class BookServiceTest {
         BookDtoWithoutCategoryIds firstBookDto = getBookDtoWithoutCategoryIdsList().get(0);
         BookDtoWithoutCategoryIds secondBookDto = getBookDtoWithoutCategoryIdsList().get(1);
         List<Book> bookList = List.of(firstBook, secondBook);
-        Mockito.when(bookRepository.findAllByCategoryId(1L, pageable)).thenReturn(bookList);
-        Mockito.when(bookMapper.toDtoWithoutCategories(firstBook)).thenReturn(firstBookDto);
-        Mockito.when(bookMapper.toDtoWithoutCategories(secondBook)).thenReturn(secondBookDto);
+        when(bookRepository.findAllByCategoryId(1L, pageable)).thenReturn(bookList);
+        when(bookMapper.toDtoWithoutCategories(firstBook)).thenReturn(firstBookDto);
+        when(bookMapper.toDtoWithoutCategories(secondBook)).thenReturn(secondBookDto);
         List<BookDtoWithoutCategoryIds> expected = List.of(firstBookDto, secondBookDto);
 
         //When
@@ -152,14 +153,14 @@ public class BookServiceTest {
 
         //Then
         assertEquals(expected, actual);
-        Mockito.verifyNoMoreInteractions(bookRepository, bookMapper);
+        verifyNoMoreInteractions(bookRepository, bookMapper);
     }
 
     @Test
     @DisplayName("""
             Update book by id when book id exists
             """)
-    public void updateBook_ExistingId_ReturnsBookDto() {
+    void updateBook_ExistingId_ReturnsBookDto() {
         //Given
         Book book = getBookList().get(0);
         book.setTitle("Sample Book 123");
@@ -168,73 +169,73 @@ public class BookServiceTest {
         CreateBookRequestDto requestDto = getCreateBookRequestDto();
         BookDto expected = getDtoFromBook(book);
 
-        Mockito.when(bookRepository.findById(anyLong())).thenReturn(Optional.of(book));
-        Mockito.doNothing().when(bookMapper).updateEntityFromDto(requestDto, book);
-        Mockito.when(bookRepository.save(book)).thenReturn(book);
-        Mockito.when(bookMapper.toDto(book)).thenReturn(expected);
+        when(bookRepository.findById(book.getId())).thenReturn(Optional.of(book));
+        doNothing().when(bookMapper).updateEntityFromDto(requestDto, book);
+        when(bookRepository.save(book)).thenReturn(book);
+        when(bookMapper.toDto(book)).thenReturn(expected);
 
         //When
-        BookDto actual = bookService.updateById(anyLong(), requestDto);
+        BookDto actual = bookService.updateById(book.getId(), requestDto);
 
         //Then
         assertEquals(expected, actual);
-        Mockito.verifyNoMoreInteractions(bookRepository, bookMapper);
+        verifyNoMoreInteractions(bookRepository, bookMapper);
     }
 
     @Test
     @DisplayName("""
             Update book by id when book id does not exists
             """)
-    public void updateBook_NonExistingId_ThrowsException() {
+    void updateBook_NonExistingId_ThrowsException() {
         //Given
         CreateBookRequestDto requestDto = getCreateBookRequestDto();
 
-        Mockito.when(bookRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(bookRepository.findById(99L)).thenReturn(Optional.empty());
 
         //Then
         assertThrows(EntityNotFoundException.class,
-                () -> bookService.updateById(anyLong(), requestDto));
-        Mockito.verifyNoMoreInteractions(bookRepository);
+                () -> bookService.updateById(99L, requestDto));
+        verifyNoMoreInteractions(bookRepository);
     }
 
     @Test
     @DisplayName("""
             Delete book by id when book id exists
             """)
-    public void deleteBook_ExistingId_ReturnsNothing() {
+    void deleteBook_ExistingId_ReturnsNothing() {
         //Given
         Book book = getBookList().get(0);
 
-        Mockito.when(bookRepository.findById(anyLong()))
+        when(bookRepository.findById(book.getId()))
                 .thenReturn(Optional.of(book));
 
         //When
-        bookService.deleteById(anyLong());
+        bookService.deleteById(book.getId());
 
         //Then
-        Mockito.verify(bookRepository).deleteById(anyLong());
+        verify(bookRepository).deleteById(book.getId());
     }
 
     @Test
     @DisplayName("""
             Delete book by id when book id does not exists
             """)
-    public void deleteBook_NonExistingId_ThrowsException() {
+    void deleteBook_NonExistingId_ThrowsException() {
         //Given
-        Mockito.when(bookRepository.findById(anyLong()))
+        when(bookRepository.findById(99L))
                 .thenReturn(Optional.empty());
 
         //Then
         assertThrows(EntityNotFoundException.class,
-                () -> bookService.deleteById(anyLong()));
-        Mockito.verifyNoMoreInteractions(bookRepository);
+                () -> bookService.deleteById(99L));
+        verifyNoMoreInteractions(bookRepository);
     }
 
     @Test
     @DisplayName("""
             Search books with valid params when books exists
             """)
-    public void searchBooks_ValidBookParams_ReturnsBookDtoList() {
+    void searchBooks_ValidBookParams_ReturnsBookDtoList() {
         //Given
         Book firstBook = getBookList().get(0);
         Book secondBook = getBookList().get(1);
@@ -247,18 +248,18 @@ public class BookServiceTest {
         BookDto secondBookDto = getDtoFromBook(secondBook);
         List<BookDto> expected = List.of(firstBookDto, secondBookDto);
 
-        Mockito.when(bookSpecificationBuilder.build(paramsDto))
+        when(bookSpecificationBuilder.build(paramsDto))
                 .thenReturn(bookSpecification);
-        Mockito.when(bookRepository.findAll(bookSpecification, pageable))
+        when(bookRepository.findAll(bookSpecification, pageable))
                 .thenReturn(page);
-        Mockito.when(bookMapper.toDtoList(booksList)).thenReturn(expected);
+        when(bookMapper.toDtoList(booksList)).thenReturn(expected);
 
         //When
         List<BookDto> actual = bookService.searchByParameters(paramsDto, pageable);
 
         //Then
         assertEquals(expected, actual);
-        Mockito.verifyNoMoreInteractions(bookRepository, bookMapper);
+        verifyNoMoreInteractions(bookRepository, bookMapper);
     }
 
     private BookDto getDtoFromBook(Book book) {

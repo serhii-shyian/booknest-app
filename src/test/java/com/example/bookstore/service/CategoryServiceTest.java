@@ -2,8 +2,10 @@ package com.example.bookstore.service;
 
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import com.example.bookstore.dto.category.CategoryDto;
 import com.example.bookstore.dto.category.CreateCategoryRequestDto;
@@ -14,13 +16,11 @@ import com.example.bookstore.repository.category.CategoryRepository;
 import com.example.bookstore.service.category.CategoryServiceImpl;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -45,60 +45,60 @@ public class CategoryServiceTest {
         Category category = getCategoryFromDto(requestDto);
         CategoryDto expected = getDtoFromCategory(category);
 
-        Mockito.when(categoryMapper.toEntity(requestDto)).thenReturn(category);
-        Mockito.when(categoryRepository.save(category)).thenReturn(category);
-        Mockito.when(categoryMapper.toDto(category)).thenReturn(expected);
+        when(categoryMapper.toEntity(requestDto)).thenReturn(category);
+        when(categoryRepository.save(category)).thenReturn(category);
+        when(categoryMapper.toDto(category)).thenReturn(expected);
 
         //When
         CategoryDto actual = categoryService.save(requestDto);
 
         //Then
-        Assertions.assertEquals(expected, actual);
-        Mockito.verifyNoMoreInteractions(categoryRepository, categoryMapper);
+        assertEquals(expected, actual);
+        verifyNoMoreInteractions(categoryRepository, categoryMapper);
     }
 
     @Test
     @DisplayName("""
             Find category by id when category exists
             """)
-    public void findByCategoryId_ExistingCategoryId_ReturnsCategory() {
+    void findByCategoryId_ExistingCategoryId_ReturnsCategory() {
         //Given
         Category category = getCategoryList().get(0);
         CategoryDto expected = getDtoFromCategory(category);
 
-        Mockito.when(categoryRepository.findById(anyLong()))
+        when(categoryRepository.findById(category.getId()))
                 .thenReturn(Optional.of(category));
-        Mockito.when(categoryMapper.toDto(category))
+        when(categoryMapper.toDto(category))
                 .thenReturn(expected);
 
         //When
-        CategoryDto actual = categoryService.findById(anyLong());
+        CategoryDto actual = categoryService.findById(category.getId());
 
         //Then
         assertEquals(expected, actual);
-        Mockito.verifyNoMoreInteractions(categoryRepository, categoryMapper);
+        verifyNoMoreInteractions(categoryRepository, categoryMapper);
     }
 
     @Test
     @DisplayName("""
             Find category by id when category does not exists
             """)
-    public void findByCategoryId_NonExistingCategoryId_ThrowsException() {
+    void findByCategoryId_NonExistingCategoryId_ThrowsException() {
         //Given
-        Mockito.when(categoryRepository.findById(anyLong()))
+        when(categoryRepository.findById(99L))
                 .thenReturn(Optional.empty());
 
         //Then
         assertThrows(EntityNotFoundException.class,
-                () -> categoryService.findById(anyLong()));
-        Mockito.verifyNoMoreInteractions(categoryRepository);
+                () -> categoryService.findById(99L));
+        verifyNoMoreInteractions(categoryRepository);
     }
 
     @Test
     @DisplayName("""
             Find all categories by valid parameters when categories exists
             """)
-    public void getAllCategories_ValidPageable_ReturnsAllCategories() {
+    void getAllCategories_ValidPageable_ReturnsAllCategories() {
         //Given
         Category firstCategory = getCategoryList().get(0);
         Category secondCategory = getCategoryList().get(1);
@@ -108,88 +108,88 @@ public class CategoryServiceTest {
         Page<Category> page = new PageImpl<>(categoryList);
         List<CategoryDto> expected = List.of(firstCategoryDto, secondCategoryDto);
 
-        Mockito.when(categoryRepository.findAll(any(Pageable.class))).thenReturn(page);
-        Mockito.when(categoryMapper.toDtoList(categoryList)).thenReturn(expected);
+        when(categoryRepository.findAll(Pageable.ofSize(5))).thenReturn(page);
+        when(categoryMapper.toDtoList(categoryList)).thenReturn(expected);
 
         //When
         List<CategoryDto> actual = categoryService.findAll(Pageable.ofSize(5));
 
         //Then
         assertEquals(expected, actual);
-        Mockito.verifyNoMoreInteractions(categoryRepository, categoryMapper);
+        verifyNoMoreInteractions(categoryRepository, categoryMapper);
     }
 
     @Test
     @DisplayName("""
             Update category by id when category id exists
             """)
-    public void updateCategory_ExistingId_ReturnsCategoryDto() {
+    void updateCategory_ExistingId_ReturnsCategoryDto() {
         //Given
         CreateCategoryRequestDto requestDto = getCreateCategoryRequestDto();
         Category category = getCategoryList().get(0);
         category.setName("Fiction123");
         CategoryDto expected = getDtoFromCategory(category);
 
-        Mockito.when(categoryRepository.findById(anyLong())).thenReturn(Optional.of(category));
-        Mockito.doNothing().when(categoryMapper).updateEntityFromDto(requestDto, category);
-        Mockito.when(categoryRepository.save(category)).thenReturn(category);
-        Mockito.when(categoryMapper.toDto(category)).thenReturn(expected);
+        when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
+        doNothing().when(categoryMapper).updateEntityFromDto(requestDto, category);
+        when(categoryRepository.save(category)).thenReturn(category);
+        when(categoryMapper.toDto(category)).thenReturn(expected);
 
         //When
-        CategoryDto actual = categoryService.updateById(anyLong(), requestDto);
+        CategoryDto actual = categoryService.updateById(category.getId(), requestDto);
 
         //Then
         assertEquals(expected, actual);
-        Mockito.verifyNoMoreInteractions(categoryRepository, categoryMapper);
+        verifyNoMoreInteractions(categoryRepository, categoryMapper);
     }
 
     @Test
     @DisplayName("""
             Update category by id when category id does not exists
             """)
-    public void updateCategory_NonExistingId_ThrowsException() {
+    void updateCategory_NonExistingId_ThrowsException() {
         //Given
         CreateCategoryRequestDto requestDto = getCreateCategoryRequestDto();
 
-        Mockito.when(categoryRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(categoryRepository.findById(99L)).thenReturn(Optional.empty());
 
         //Then
         assertThrows(EntityNotFoundException.class,
-                () -> categoryService.updateById(anyLong(), requestDto));
-        Mockito.verifyNoMoreInteractions(categoryRepository);
+                () -> categoryService.updateById(99L, requestDto));
+        verifyNoMoreInteractions(categoryRepository);
     }
 
     @Test
     @DisplayName("""
             Delete category by id when category id exists
             """)
-    public void deleteCategory_ExistingId_ReturnsNothing() {
+    void deleteCategory_ExistingId_ReturnsNothing() {
         //Given
         Category category = getCategoryList().get(0);
 
-        Mockito.when(categoryRepository.findById(anyLong()))
+        when(categoryRepository.findById(category.getId()))
                 .thenReturn(Optional.of(category));
 
         //When
-        categoryService.deleteById(anyLong());
+        categoryService.deleteById(category.getId());
 
         //Then
-        Mockito.verify(categoryRepository).deleteById(anyLong());
+        verify(categoryRepository).deleteById(category.getId());
     }
 
     @Test
     @DisplayName("""
             Delete category by id when category id does not exists
             """)
-    public void deleteCategory_NonExistingId_ThrowsException() {
+    void deleteCategory_NonExistingId_ThrowsException() {
         //Given
-        Mockito.when(categoryRepository.findById(anyLong()))
+        when(categoryRepository.findById(99L))
                 .thenReturn(Optional.empty());
 
         //Then
         assertThrows(EntityNotFoundException.class,
-                () -> categoryService.deleteById(anyLong()));
-        Mockito.verifyNoMoreInteractions(categoryRepository);
+                () -> categoryService.deleteById(99L));
+        verifyNoMoreInteractions(categoryRepository);
     }
 
     private Category getCategoryFromDto(CreateCategoryRequestDto requestDto) {

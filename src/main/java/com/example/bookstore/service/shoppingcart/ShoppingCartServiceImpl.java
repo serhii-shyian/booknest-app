@@ -20,7 +20,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,19 +42,19 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public ShoppingCartDto findShoppingCart(
-            Authentication authentication, Pageable pageable) {
-        ShoppingCart shoppingCartFromDB = findShoppingCartByUserId(authentication);
+            User user, Pageable pageable) {
+        ShoppingCart shoppingCartFromDB = findShoppingCartByUserId(user.getId());
         ShoppingCartDto shoppingCartDto = shoppingCartMapper.toDto(shoppingCartFromDB);
-        Set<CartItemDto> cartItemsSetById = findSetByShoppingCartId(authentication, pageable);
+        Set<CartItemDto> cartItemsSetById = findSetByShoppingCartId(user, pageable);
         shoppingCartDto.setCartItems(cartItemsSetById);
         return shoppingCartDto;
     }
 
     @Override
     public CartItemDto addBookToShoppingCart(
-            Authentication authentication, CreateCartItemRequestDto createCartDto) {
+            User user, CreateCartItemRequestDto createCartDto) {
         Book bookFromDB = findBookByBookId(createCartDto);
-        ShoppingCart shoppingCartFromDB = findShoppingCartByUserId(authentication);
+        ShoppingCart shoppingCartFromDB = findShoppingCartByUserId(user.getId());
         CartItem cartItemFromDB = shoppingCartFromDB.getCartItems().stream().filter(
                         cartItem -> cartItem.getBook().getId().equals(bookFromDB.getId()))
                 .findFirst().orElseGet(() -> {
@@ -71,7 +70,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public CartItemDto updateBookInShoppingCart(
-            Authentication authentication,
+            User user,
             Long cartItemId,
             UpdateCartItemRequestDto updateCartDto) {
         CartItem cartItemFromDB = findCartItemById(cartItemId);
@@ -83,17 +82,16 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public void deleteBookFromShoppingCart(
-            Authentication authentication, Long cartItemId) {
+            User user, Long cartItemId) {
         CartItem cartItemFromDB = findCartItemById(cartItemId);
         isShoppingCartContainsCartItem(cartItemId);
         cartItemRepository.delete(cartItemFromDB);
     }
 
-    private ShoppingCart findShoppingCartByUserId(Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
-        return shoppingCartRepository.findByUserId(user.getId())
+    private ShoppingCart findShoppingCartByUserId(Long userId) {
+        return shoppingCartRepository.findByUserId(userId)
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "Can't find ShoppingCart by userId: " + user.getId()));
+                        "Can't find ShoppingCart by userId: " + userId));
     }
 
     private Book findBookByBookId(CreateCartItemRequestDto createCartDto) {
@@ -113,17 +111,17 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     public Set<CartItemDto> findSetByShoppingCartId(
-            Authentication authentication, Pageable pageable) {
-        Long shoppingCartId = findShoppingCartByUserId(authentication).getId();
+            User user, Pageable pageable) {
+        Long shoppingCartId = findShoppingCartByUserId(user.getId()).getId();
         return findCartItemsListById(shoppingCartId, pageable).stream()
                 .map(cartItemMapper::toDto)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     private void isShoppingCartContainsCartItem(Long cartItemId) {
-        Set<CartItem> cartItemsSetById = cartItemRepository.findAllCartItemsSet();
+        List<CartItem> cartItemsListById = cartItemRepository.findAll();
         CartItem cartItemById = findCartItemById(cartItemId);
-        if (cartItemsSetById.stream().noneMatch(
+        if (cartItemsListById.stream().noneMatch(
                 cartItem -> cartItem.getId().equals(cartItemById.getId()))) {
             throw new EntityNotFoundException(
                     "Can't find CartItem in the ShoppingCart by id: " + cartItemId);

@@ -1,5 +1,9 @@
 package com.example.bookstore.controller;
 
+import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -18,9 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import javax.sql.DataSource;
 import lombok.SneakyThrows;
-import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
@@ -101,8 +103,8 @@ public class CategoryControllerTest {
         CategoryDto[] actual = objectMapper.readValue(
                 result.getResponse()
                         .getContentAsByteArray(), CategoryDto[].class);
-        Assertions.assertEquals(3, actual.length);
-        Assertions.assertEquals(expected, Arrays.stream(actual).toList());
+        assertEquals(3, actual.length);
+        assertEquals(expected, Arrays.stream(actual).toList());
     }
 
     @Test
@@ -127,8 +129,8 @@ public class CategoryControllerTest {
         CategoryDto actual = objectMapper.readValue(
                 result.getResponse()
                         .getContentAsByteArray(), CategoryDto.class);
-        Assertions.assertNotNull(actual);
-        EqualsBuilder.reflectionEquals(expected, actual);
+        assertNotNull(actual);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -170,8 +172,8 @@ public class CategoryControllerTest {
         List<BookDtoWithoutCategoryIds> actual = Arrays.stream(
                 objectMapper.readValue(result.getResponse().getContentAsByteArray(),
                         BookDtoWithoutCategoryIds[].class)).toList();
-        Assertions.assertEquals(2, actual.size());
-        Assertions.assertEquals(expected, actual);
+        assertEquals(2, actual.size());
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -199,9 +201,10 @@ public class CategoryControllerTest {
         CategoryDto actual = objectMapper.readValue(
                 result.getResponse()
                         .getContentAsByteArray(), CategoryDto.class);
-        Assertions.assertNotNull(actual);
-        Assertions.assertNotNull(actual.id());
-        EqualsBuilder.reflectionEquals(expected, actual, "id");
+        assertNotNull(actual);
+        assertNotNull(actual.id());
+        assertTrue(reflectionEquals(expected, actual, "id"),
+                "Expected and actual CategoryDto should be equal.");
     }
 
     @Test
@@ -229,8 +232,8 @@ public class CategoryControllerTest {
         CategoryDto actual = objectMapper.readValue(
                 result.getResponse()
                         .getContentAsByteArray(), CategoryDto.class);
-        Assertions.assertNotNull(actual);
-        EqualsBuilder.reflectionEquals(expected, actual);
+        assertNotNull(actual);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -250,7 +253,7 @@ public class CategoryControllerTest {
 
         //Then
         String actual = result.getResponse().getContentAsString();
-        Assertions.assertTrue(actual.isEmpty());
+        assertTrue(actual.isEmpty());
     }
 
     private List<CreateCategoryRequestDto> getCreateCategoryRequestDtoList() {

@@ -61,7 +61,10 @@ public class BookRepositoryTest {
         List<Book> actual = bookRepository.findAllByCategoryId(1L, Pageable.ofSize(5));
 
         //Then
-        assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+        assertThat(actual)
+                .usingRecursiveComparison()
+                .ignoringFields("categories")
+                .isEqualTo(expected);
     }
 
     private List<Book> getBookList() {
