@@ -63,8 +63,7 @@ Exception handling and data validation are built-in to ensure a robust applicati
 2. Download [JDK](https://www.oracle.com/java/technologies/downloads/) and install it on computer
 3. Download [IntelliJ IDEA](https://www.jetbrains.com/idea/download) and install it on computer
 4. Download [MySQL](https://dev.mysql.com/downloads/installer/) and install it on computer
-5. Download [Workbench](https://dev.mysql.com/downloads/workbench/) and install it on computer, copy and run **init_db.sql** (/src/main/resources/init_db.sql)
-   <br> SQL script in Workbench
+5. Download [Workbench](https://dev.mysql.com/downloads/workbench/) and install it on computer
 6. Download [Docker](https://www.docker.com/products/docker-desktop/) and install it on computer
 7. Open IntelliJ IDEA and load the previously saved project
 8. Open the .env file (/.env) and replace YOUR_PASSWORD with the password that was specified when installing
