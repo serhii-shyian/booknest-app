@@ -40,6 +40,17 @@ Exception handling and data validation are built-in to ensure a robust applicati
 - ***Service Layer:*** Contains business logic and manages interactions between the controller and repository layers
 - ***Repository Layer:*** Provides data access using JpaRepository for database operations
 
+**The entities involved in this project include:**
+- ***User:*** Contains user authentication and personal information.
+- ***Role:*** Defines user roles such as USER or ADMIN.
+- ***Book:*** Represents books available in the store.
+- ***Category:*** Categorizes books.
+- ***ShoppingCart:*** Represents a user's shopping cart.
+- ***Order:*** Represents a purchase order.
+- ***OrderItem:*** Represents individual items within an order.
+
+![pic](bookstore_uml.png)
+
 ## 🪄 Used technologies
 
 ---
@@ -75,6 +86,8 @@ MYSQL_ROOT_PASSWORD=YOUR_PASSWORD;
 10. The application will be accessible at http://localhost:8080.
 11. To run the project using Docker Compose execute the following command in the terminal:
 ```java
+mvn clean package
+
 docker-compose up
 ```
 12. The application will be accessible at http://localhost:8088.
