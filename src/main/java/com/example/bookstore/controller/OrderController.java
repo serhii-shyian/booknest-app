@@ -43,7 +43,7 @@ public class OrderController {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Submit current order",
             description = "Submitting current creating order")
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('USER')")
     public OrderDto submitOrder(@RequestBody @Valid CreateOrderRequestDto requestDto,
                                 @ParameterObject
                                 @PageableDefault(
@@ -59,7 +59,7 @@ public class OrderController {
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Get user orders",
             description = "Getting all user orders")
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('USER')")
     public List<OrderDto> getOrders(@ParameterObject
                                     @PageableDefault(
                                             size = 5,
@@ -84,7 +84,7 @@ public class OrderController {
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Get items from order",
             description = "Getting items from order by orderId")
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('USER')")
     public List<OrderItemDto> getOrderItemsByOrderId(@PathVariable @Positive Long orderId,
                                                      @ParameterObject
                                                      @PageableDefault(
@@ -99,7 +99,7 @@ public class OrderController {
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Get order items",
             description = "Getting order items by orderId and ItemId")
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('USER')")
     public OrderItemDto getOrderItemByIdAndOrderId(@PathVariable @Positive Long orderId,
                                                    @PathVariable @Positive Long orderItemId) {
         return orderService.getOrderItemByIdAndOrderId(orderId, orderItemId);

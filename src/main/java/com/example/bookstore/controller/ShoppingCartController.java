@@ -41,7 +41,7 @@ public class ShoppingCartController {
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Get a user shopping cart",
             description = "Getting a user shopping cart if available")
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('USER')")
     public ShoppingCartDto getUserShoppingCart(Authentication authentication,
                                                @ParameterObject
                                                @PageableDefault(
@@ -57,7 +57,7 @@ public class ShoppingCartController {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Add a book to shopping cart",
             description = "Adding a book to shopping cart according to the parameters")
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('USER')")
     public CartItemDto addBookToShoppingCart(
             Authentication authentication,
             @RequestBody @Valid CreateCartItemRequestDto createCartDto) {
@@ -69,7 +69,7 @@ public class ShoppingCartController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Update a book in shopping cart",
             description = "Updating a book in shopping cart according to the parameters")
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('USER')")
     public CartItemDto updateBookInShoppingCart(
             Authentication authentication,
             @PathVariable @Positive Long cartItemId,
@@ -83,7 +83,7 @@ public class ShoppingCartController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete a book from shopping cart",
             description = "Delete a book from shopping cart if available")
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('USER')")
     public void deleteBookFromShoppingCart(Authentication authentication,
                                            @PathVariable @Valid Long cartItemId) {
         User user = (User) authentication.getPrincipal();

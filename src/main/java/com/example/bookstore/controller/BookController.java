@@ -39,7 +39,7 @@ public class BookController {
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Get all books",
             description = "Getting a list of all available books")
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('USER')")
     public List<BookDto> getAll(@ParameterObject
                                 @PageableDefault(
                                         size = 5,
@@ -53,7 +53,7 @@ public class BookController {
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Get a book by id",
             description = "Getting a book by id if available")
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('USER')")
     public BookDto getBookById(@PathVariable @Positive Long bookId) {
         return bookService.findById(bookId);
     }
@@ -62,7 +62,7 @@ public class BookController {
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Get all books by parameters",
             description = "Getting a list of all books according to the parameters")
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('USER')")
     public List<BookDto> searchBooks(BookSearchParametersDto searchParameters,
                                      @ParameterObject
                                      @PageableDefault(
@@ -77,7 +77,7 @@ public class BookController {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create a new book",
             description = "Creating a new book according to the parameters")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public BookDto createBook(@RequestBody @Valid CreateBookRequestDto bookDto) {
         return bookService.save(bookDto);
     }
@@ -86,7 +86,7 @@ public class BookController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Update a book by id",
             description = "Updating a book by id according to the parameters")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public BookDto updateBookById(@PathVariable @Positive Long bookId,
                                   @RequestBody @Valid CreateBookRequestDto bookDto) {
         return bookService.updateById(bookId, bookDto);
@@ -96,7 +96,7 @@ public class BookController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete a book by id",
             description = "Deleting a book by id if available")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteBookById(@PathVariable @Positive Long bookId) {
         bookService.deleteById(bookId);
     }

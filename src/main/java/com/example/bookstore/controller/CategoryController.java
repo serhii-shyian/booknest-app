@@ -41,7 +41,7 @@ public class CategoryController {
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Get all categories",
             description = "Getting a list of all available categories")
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('USER')")
     public List<CategoryDto> getAll(@ParameterObject
                                     @PageableDefault(
                                             size = 5,
@@ -55,7 +55,7 @@ public class CategoryController {
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Get a category by id",
             description = "Getting a category by id if available")
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('USER')")
     public CategoryDto getCategoryById(@PathVariable @Positive Long categoryId) {
         return categoryService.findById(categoryId);
     }
@@ -64,7 +64,7 @@ public class CategoryController {
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Get all books by category id",
             description = "Getting all books by category id if available")
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('USER')")
     public List<BookDtoWithoutCategoryIds> getBooksByCategoryId(
             @PathVariable @Positive Long categoryId,
             @ParameterObject @PageableDefault(
