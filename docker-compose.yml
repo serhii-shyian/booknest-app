@@ -22,7 +22,7 @@ services:
       mysqldb:
         condition: service_healthy
     restart: unless-stopped
-    image: bookstore-app
+    image: booknest-app
     build: .
     env_file: ./.env
     ports:

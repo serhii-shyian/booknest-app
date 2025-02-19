@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="Taxi service" height="150" src="logo-ba.svg">
+  <img alt="Taxi service" height="250" src="logo-bn.svg">
 </p>
 
 ## 📚 Project description
