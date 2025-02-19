@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="Taxi service" height="250" src="logo-bn.svg">
+  <img alt="Booknest logo" height="250" src="logo-bn.svg">
 </p>
 
 ## 📚 Project description
